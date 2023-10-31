@@ -1,20 +1,62 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import Login from './components/login';
+import Statis from './components/statis';
+import Home from './components/home';
 
-export default function App() {
+const Stack = createStackNavigator();
+
+const Tab = createBottomTabNavigator();
+
+function MyTabs() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Tab.Navigator>
+      <Tab.Screen
+        name="home"
+        component={Home}
+        options={{
+          tabBarLabel: 'Home',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="ios-home-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="statis"
+        component={Statis}
+        options={{
+          tabBarLabel: 'Statistics',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="ios-analytics-outline" color={color} size={size} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+  const [userIsAuthenticated, setUserIsAuthenticated] = React.useState(false);
+  return (
+      <NavigationContainer>
+        {userIsAuthenticated ?
+        (<MyTabs/>) :
+        (<Stack.Navigator>
+          <Stack.Screen name="login">
+              {() => (
+                <Login
+                  setUserIsAuthenticated={setUserIsAuthenticated}
+                />
+              )}
+          </Stack.Screen>
+        </Stack.Navigator>)
+        }
+      </NavigationContainer>
+  );
+}
+
+
+
