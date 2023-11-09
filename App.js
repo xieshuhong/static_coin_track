@@ -6,6 +6,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Login from './components/login';
 import Statis from './components/statis';
 import Home from './components/home';
+import { Button } from 'react-native';
 
 const Stack = createStackNavigator();
 
@@ -19,6 +20,13 @@ function MyTabs() {
         component={Home}
         options={{
           tabBarLabel: 'Home',
+          headerLeft: () => (
+            <Button
+              title='< Back'
+            >
+
+            </Button>
+          ),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="ios-home-outline" color={color} size={size} />
           ),

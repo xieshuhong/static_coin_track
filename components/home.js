@@ -3,6 +3,9 @@ import {Text, StyleSheet, View, TextInput, Button} from 'react-native';
 export default function Home() {
     const [text, onChangeText] = React.useState('');
     return (
+
+      
+        
         <View style={styles.container}>
             <Text style={styles.baseText}>Expense tracker</Text>
             <Text style={styles.balance}>YOUR BALANCE</Text>
@@ -18,7 +21,7 @@ export default function Home() {
                 </View>
             </View>
             <Text style={styles.transaction}>Add new transaction</Text>
-            <Text style={styles.text}>Text</Text>
+            <Text style={styles.text}>Add Title for Income/Expense</Text>
             <TextInput
                 style={styles.input}
                 onChangeText={onChangeText}
@@ -42,6 +45,7 @@ export default function Home() {
                 />
             </View>
         </View>
+        
     )
 }
 
