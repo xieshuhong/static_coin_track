@@ -1,18 +1,27 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, {useState} from 'react';
+import { NavigationContainer , getFocusedRouteNameFromRoute} from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Login from './components/login';
 import Statis from './components/statis';
 import Home from './components/home';
-import { Button } from 'react-native';
 
 const Stack = createStackNavigator();
-
 const Tab = createBottomTabNavigator();
 
-function MyTabs() {
+function getHeaderTitle(route) {
+  const routeName = getFocusedRouteNameFromRoute(route) ?? 'home';
+
+  switch (routeName) {
+    case 'home':
+      return 'Home';
+    case 'statis':
+      return 'Statis';
+  }
+}
+
+function HomeTab() {
   return (
     <Tab.Navigator>
       <Tab.Screen
@@ -20,13 +29,7 @@ function MyTabs() {
         component={Home}
         options={{
           tabBarLabel: 'Home',
-          headerLeft: () => (
-            <Button
-              title='< Back'
-            >
-
-            </Button>
-          ),
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="ios-home-outline" color={color} size={size} />
           ),
@@ -37,8 +40,12 @@ function MyTabs() {
         component={Statis}
         options={{
           tabBarLabel: 'Statistics',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="ios-analytics-outline" color={color} size={size} />
+            <Ionicons 
+              name="ios-analytics-outline" 
+              color={color} size={size}
+              />
           ),
         }}
       />
@@ -46,24 +53,35 @@ function MyTabs() {
   );
 }
 
+
 export default function App() {
-  const [userIsAuthenticated, setUserIsAuthenticated] = React.useState(false);
-  return (
+
+return (
       <NavigationContainer>
-        {userIsAuthenticated ?
-        (<MyTabs/>) :
-        (<Stack.Navigator>
-          <Stack.Screen name="login">
-              {() => (
-                <Login
-                  setUserIsAuthenticated={setUserIsAuthenticated}
-                />
-              )}
-          </Stack.Screen>
-        </Stack.Navigator>)
-        }
+          <Stack.Navigator>
+              <Stack.Screen name='Login' component={Login}/>
+              <Stack.Screen
+                name="Home"
+                component={HomeTab}
+                options={({ navigation, route}) => ({
+                  headerTitle: false,
+                  name: '',
+                  headerTitle: getHeaderTitle(route),
+                  headerLeft: () => (
+                    <Ionicons
+                      name="ios-arrow-back"
+                      size={30}
+                      style={{ marginLeft: 10 }}
+                      onPress={() =>{
+                        navigation.navigate("Login");
+                      }}
+                    />
+                  ),
+                })}
+              />
+          </Stack.Navigator>
       </NavigationContainer>
-  );
+);
 }
 
 

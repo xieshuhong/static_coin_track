@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet, Text, Button } from "react-native";
 import RNEChartsPro from "react-native-echarts-pro";
 
-export default function RNEPDemo() {
+export default function Statis() {
   const pieOption = {
     series: [
       {

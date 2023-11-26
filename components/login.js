@@ -1,37 +1,45 @@
 import React from 'react';
-import {SafeAreaView, StyleSheet, TextInput, Image, Button, View} from 'react-native';
+import {SafeAreaView, StyleSheet, TextInput, Image, Button, View, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-export default function Login({setUserIsAuthenticated}) {
+export default function Login({navigation}) {
+  // const navigation = useNavigation();
+
+  const onPressHandler = (() => {
+    navigation.navigate('Home');
+  })
 
   const [text, onChangeText] = React.useState('');
   const [number, onChangeNumber] = React.useState('');
   return (
-    <View style={styles.container}>
-      <SafeAreaView>
-        <Image
-          style={styles.logo}
-          source={require('../assets/logo.png')}
-        />
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()} accessible={false}>
+        <View style={styles.container}>
+          <SafeAreaView>
+            <Image
+              style={styles.logo}
+              source={require('../assets/logo.png')}
+            />
 
-        <TextInput
-          style={styles.input}
-          onChangeText={onChangeText}
-          placeholder="email"
-          value={text}
-        />
-        <TextInput
-          style={styles.input}
-          onChangeText={onChangeNumber}
-          value={number}
-          placeholder="password"
-        />
-        <Button
-          title="Login"
-          color="#007AFF"
-          onPress={() => setUserIsAuthenticated(true)}
-        />
-      </SafeAreaView>
-    </View>
+            <TextInput
+              style={styles.input}
+              onChangeText={onChangeText}
+              placeholder="email"
+              value={text}
+            />
+            <TextInput
+              style={styles.input}
+              onChangeText={onChangeNumber}
+              value={number}
+              placeholder="password"
+            />
+            <Button
+              title="Login"
+              color="#007AFF"
+              onPress={onPressHandler}
+            />
+          </SafeAreaView>
+        </View>
+    </TouchableWithoutFeedback>  
   );
 }
 
@@ -41,7 +49,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'space-evenly'
+    paddingTop: 100,
   },
   input: {
     height: 40,
