@@ -1,66 +1,101 @@
-import React from "react";
+import React, {Component} from 'react';
 import { View, StyleSheet, Text, Button } from "react-native";
 import RNEChartsPro from "react-native-echarts-pro";
+import { connect } from 'react-redux';
 
-export default function Statis() {
-  const pieOption = {
-    series: [
-      {
-        name: "Source",
-        type: "pie",
-        legendHoverLink: true,
-        hoverAnimation: true,
-        avoidLabelOverlap: true,
-        startAngle: 180,
-        radius: "55%",
-        center: ["50%", "35%"],
-        data: [
-          { value: 105.2, name: "income" },
-          { value: 310, name: "expense" },
-          { value: 234, name: "cloth" },
-        ],
-        label: {
-          normal: {
-            show: true,
-            textStyle: {
-              fontSize: 12,
-              color: "#23273C",
+  const mapStateToProps = (state) => {
+    return {
+      incomes: state.reducers.incomes,
+      expenses: state.reducers.expenses,
+      totalExpenseValue: state.reducers.totalExpense
+    }
+  }
+
+
+
+  class Statis extends Component {
+    constructor(props) {
+      super(props);
+    }
+
+
+    generatePieData = (data) => {
+      return data.map((item) => ({ value: item.amount, name: item.type }));
+    };
+
+    formatLabel = (params) => {
+      return `${params.name}: ${params.value} (${((params.percent * 100).toFixed(2))}%)`;
+    };
+
+    render() {
+      const { incomes, expenses, totalExpenseValue} = this.props;
+      const incomePieOption  = {
+        series: [
+          {
+            name: "Source",
+            type: "pie",
+            legendHoverLink: true,
+            hoverAnimation: true,
+            avoidLabelOverlap: true,
+            startAngle: 180,
+            radius: "55%",
+            center: ["50%", "35%"],
+            data: this.generatePieData(incomes),
+            label: {
+              normal: {
+                show: true,
+                textStyle: {
+                  fontSize: 12,
+                  color: '#23273C',
+                },
+              },
             },
           },
-        },
-      },
-    ],
-  };
+        ],
+      };
+      const expensePieOption = {
+        series: [
+          {
+            name: 'Expense',
+            type: 'pie',
+            legendHoverLink: true,
+            hoverAnimation: true,
+            avoidLabelOverlap: true,
+            startAngle: 180,
+            radius: '55%',
+            center: ['50%', '35%'],
+            data: this.generatePieData(expenses),
+            label: {
+              normal: {
+                show: true,
+                textStyle: {
+                  fontSize: 12,
+                  color: '#23273C',
+                },
+              },
+            },
+          },
+        ],
+      };
+      return (
+              <View style={styles.container}>
+                  <Text style={styles.text}>Year - 2023</Text>
+                  <View>
+                      <Text style={styles.text}>You've spent {totalExpenseValue} on this year!</Text>
+                  </View>
+                  <Text style={styles.text}>Analytics</Text>
+                  <View style={{ height: 250, paddingTop: 25, marginTop: 20 }}>
+                    <RNEChartsPro height={250} option={incomePieOption} />
+                  </View>
+                  <View style={{ height: 250, marginTop: 20 }}>
+                      <RNEChartsPro height={250} option={expensePieOption} />
+                  </View>
+              </View>
+      );
+    };
+  }
 
-  const months = [
-    'September', 'October', 'November', 'December'
-  ];
-
-  return (
-        <View style={styles.container}>
-            <Text style={styles.text}>Amount</Text>
-            <Text style={styles.text}>Year - 2023</Text>
-            <View style={styles.months}>
-                {months.map((month, index) => (
-                <View style={styles.monthList}>
-                    <Button                     
-                        title={month}
-                        key={index}
-                        color="#ffffff"
-                    />
-                </View>
-                ))}
-            </View>
-            <View>
-                <Text style={styles.text}>You've spent $2,600 in this month</Text>
-            </View>
-            <Text style={styles.text}>Analytics</Text>
-            <View style={{ height: 300, paddingTop: 25 , marginTop: 20}}>
-                <RNEChartsPro height={250} option={pieOption} />
-            </View>
-        </View>
-  );
-}
+  export default connect(mapStateToProps)(Statis);
 
 const styles = StyleSheet.create({
     container: {
@@ -79,7 +114,6 @@ const styles = StyleSheet.create({
         marginTop: 20,
       },
       months: {
-        // flex: 1,
         flexDirection: 'row',
 
       },

@@ -1,4 +1,4 @@
-import {SET_INCOME, SET_EXPENSE, TOTAL_INCOME} from './actions';
+import {SET_INCOME, SET_EXPENSE, TOTAL_INCOME, TOTAL_EXPENSE, BALANCE} from './actions';
 
 const initialState = {
     incomes: [
@@ -16,12 +16,14 @@ const initialState = {
         {type: 'Transportation', amount: 0},
         {type: 'Entertainment', amount: 0},
     ],
-    totalIncome: 0
+    totalIncome: 0,
+    totalExpense: 0,
+    balance: 0,
+
 }
 
 
 function reducers(state = initialState, action) {
-    console.log('Reducer Action:', action.data);
     switch (action.type) {
         case SET_INCOME:
             return {
@@ -46,6 +48,18 @@ function reducers(state = initialState, action) {
             return {
                 ...state,
                 totalIncome
+            };
+        case TOTAL_EXPENSE:
+            const totalExpense = state.expenses.reduce((total, expense) => total + expense.amount, 0);
+            return {
+                ...state,
+                totalExpense
+            };
+        case BALANCE:
+            const balance = state.totalIncome - state.totalExpense;
+            return {
+                ...state,
+                balance
             };
         default:
             return state;

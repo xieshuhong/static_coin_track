@@ -3,14 +3,15 @@ import { Alert } from 'react-native';
 import { Text, StyleSheet, View, TextInput, Button, TouchableWithoutFeedback, Keyboard, ScrollView, KeyboardAvoidingView } from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown';
 import { connect } from 'react-redux';
-import { setIncome, setExpense, totalIncome } from '../src/redux/actions';
+import { setIncome, setExpense, totalIncome, totalExpense, calculateBalance} from '../src/redux/actions';
 
 const mapStateToProps = (state) => {
-   console.log('Redux State:', state);
      return {
         incomes: state.reducers.incomes,
         expenses: state.reducers.expenses,
-        totalIncomeValue: state.reducers.totalIncome
+        totalIncomeValue: state.reducers.totalIncome,
+        totalExpenseValue: state.reducers.totalExpense,
+        balanceValue: state.reducers.balance
      }
 }
 
@@ -19,6 +20,8 @@ const mapDispatchToProps = (dispatch) => {
     setIncome: (income) => dispatch(setIncome(income)),
     setExpense: (expense) => dispatch(setExpense(expense)),
     totalIncome: () => dispatch(totalIncome()),
+    totalExpense: () => dispatch(totalExpense()),
+    calculateBalance: () => dispatch(calculateBalance()),
   };
 };
 
@@ -45,7 +48,7 @@ class Home extends Component {
     this.setState({ selectedExpenseType: selectedItem });
   };
   render() {
-    const { incomes, expenses, totalIncomeValue } = this.props;
+    const { incomes, expenses, totalIncomeValue, totalExpenseValue, balanceValue} = this.props;
     const { selectedIncomeType, selectedExpenseType, incomeAmount, expenseAmount } = this.state;
 
     const incomeTypeOptions = incomes && incomes.map((income) => income.type);
@@ -64,6 +67,8 @@ class Home extends Component {
           await this.props.setExpense({ type: selectedExpenseType, amount: expenseAmount });
           Alert.alert('Success', 'Submission successful!', [{ text: 'OK' }]);
           await this.props.totalIncome();
+          await this.props.totalExpense();
+          await this.props.calculateBalance();
           this.setState({
             selectedIncomeType: null,
             selectedExpenseType: null,
@@ -84,7 +89,7 @@ class Home extends Component {
                     keyboardVerticalOffset={Platform.OS === 'ios' ? 120 : 0} // Adjust this value based on your layout
         >
           <ScrollView style={styles.container}>
-            <Text style={styles.balance}>YOUR BALANCE: 0.00</Text>
+            <Text style={styles.balance}>YOUR BALANCE:{balanceValue}</Text>
             <View style={styles.small}>
               <View style={styles.item}>
                 <Text>total income</Text>
@@ -92,7 +97,7 @@ class Home extends Component {
               </View>
               <View style={styles.item}>
                 <Text>total expense</Text>
-                <Text>0.00</Text>
+                <Text>{totalExpenseValue}</Text>
               </View>
             </View>
             <Text style={styles.text}>Select an income source</Text>
