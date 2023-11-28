@@ -1,30 +1,82 @@
-import React from 'react';
+import React, {Component} from 'react';
+import { Alert } from 'react-native';
 import { Text, StyleSheet, View, TextInput, Button, TouchableWithoutFeedback, Keyboard, ScrollView, KeyboardAvoidingView } from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown';
-export default function Home() {
-  const [income, setIncome] = React.useState(1000);
-  const [expense, setExpense] = React.useState(1000);
-  const [balance, setBalance] = React.useState(1000);
-  const [selectedIncomeType, setSelectedIncomeType] = React.useState(null);
-  const [selectedExpenseType, setSelectedExpenseType] = React.useState(null);
+import { connect } from 'react-redux';
+import { setIncome, setExpense, totalIncome } from '../src/redux/actions';
 
-  const incomeTypes = ["Salary", "Freelance Work", "Rental Income", "Investments", "Side Business"];
-  const expenseTypes = ["Rent", "Mortgage", "Utilities", "Groceries", "Transportation", "Entertainment"];
+const mapStateToProps = (state) => {
+   console.log('Redux State:', state);
+     return {
+        incomes: state.reducers.incomes,
+        expenses: state.reducers.expenses,
+        totalIncomeValue: state.reducers.totalIncome
+     }
+}
 
-  const isSubmissionValid = () => {
-    return selectedIncomeType !== null && income.trim() !== '' &&
-           selectedExpenseType !== null && expense.trim() !== '';
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setIncome: (income) => dispatch(setIncome(income)),
+    setExpense: (expense) => dispatch(setExpense(expense)),
+    totalIncome: () => dispatch(totalIncome()),
   };
-  const onSubmit = () => {
-    if (isSubmissionValid()) {
-      // Perform the submission logic here
-      console.log('Submission successful!');
-    } else {
-      console.log('Please fill in all the fields.');
-    }
+};
+
+
+
+class Home extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedIncomeType: null,
+      selectedExpenseType: null,
+      incomeAmount: 0,
+      expenseAmount: 0,
+    };
+    this.incomeDropdownRef = React.createRef();
+    this.expenseDropdownRef = React.createRef();
   }
 
-  return (
+  setSelectedIncomeType = (selectedItem) => {
+    this.setState({ selectedIncomeType: selectedItem });
+  };
+
+  setSelectedExpenseType = (selectedItem) => {
+    this.setState({ selectedExpenseType: selectedItem });
+  };
+  render() {
+    const { incomes, expenses, totalIncomeValue } = this.props;
+    const { selectedIncomeType, selectedExpenseType, incomeAmount, expenseAmount } = this.state;
+
+    const incomeTypeOptions = incomes && incomes.map((income) => income.type);
+    const expenseTypeOptions = expenses && expenses.map((expense) => expense.type);
+  
+    const isSubmissionValid = () => {
+      return (
+        (selectedIncomeType !== null && incomeAmount > 0) ||
+        (selectedExpenseType !== null && expenseAmount > 0)
+      );
+    };
+    const onSubmit = async () => {
+      if (isSubmissionValid()) {
+            // Dispatch actions to update Redux state
+          await this.props.setIncome({ type: selectedIncomeType, amount: incomeAmount });
+          await this.props.setExpense({ type: selectedExpenseType, amount: expenseAmount });
+          Alert.alert('Success', 'Submission successful!', [{ text: 'OK' }]);
+          await this.props.totalIncome();
+          this.setState({
+            selectedIncomeType: null,
+            selectedExpenseType: null,
+            incomeAmount: 0,
+            expenseAmount: 0,
+          });
+          this.incomeDropdownRef.current.reset();
+          this.expenseDropdownRef.current.reset();
+      } else {
+          Alert.alert('Error', 'Please fill in all the fields.', [{ text: 'OK' }]);
+      }
+    }
+    return(
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()} accessible={false}>
         <KeyboardAvoidingView
                     style={styles.container}
@@ -36,7 +88,7 @@ export default function Home() {
             <View style={styles.small}>
               <View style={styles.item}>
                 <Text>total income</Text>
-                <Text>{income}</Text>
+                <Text>{totalIncomeValue}</Text>
               </View>
               <View style={styles.item}>
                 <Text>total expense</Text>
@@ -45,9 +97,10 @@ export default function Home() {
             </View>
             <Text style={styles.text}>Select an income source</Text>
             <SelectDropdown
-              data={incomeTypes}
+              ref={this.incomeDropdownRef}
+              data={incomeTypeOptions}
               onSelect={(selectedItem, index) => {
-                setSelectedIncomeType(selectedItem);
+                this.setSelectedIncomeType(selectedItem);
               }}
               defaultButtonText={'Select an income source'}
               buttonTextAfterSelection={(selectedItem, index) => {
@@ -66,16 +119,17 @@ export default function Home() {
             <Text style={styles.text}>The amount of income</Text>
             <TextInput
               style={styles.input}
-              onChangeText={(value) => setIncome(parseFloat(value) || 0)}
-              placeholder='0'
-              value={income.toString()}
+              onChangeText={(value) => this.setState({ incomeAmount: parseFloat(value) || 0 })}
+              onFocus={() => this.setState({incomeAmount: ''})}
+              value={incomeAmount.toString()}
               keyboardType='numeric'
             />
             <Text style={styles.text}>Select an expense type</Text>
             <SelectDropdown
-              data={expenseTypes}
+              ref={this.expenseDropdownRef}
+              data={expenseTypeOptions}
               onSelect={(selectedItem, index) => {
-                setSelectedExpenseType(selectedItem);
+                this.setSelectedExpenseType(selectedItem);
               }}
               defaultButtonText={'Select an expense type'}
               buttonTextAfterSelection={(selectedItem, index) => {
@@ -94,9 +148,9 @@ export default function Home() {
             <Text style={styles.text}>The amount of expense</Text>
             <TextInput
               style={styles.input}
-              onChangeText={(value) => setExpense(parseFloat(value) || 0)}
-              placeholder='0'
-              value={expense.toString()}
+              onChangeText={(value) => this.setState({ expenseAmount: parseFloat(value) || 0 })}
+              value={expenseAmount.toString()}
+              onFocus={() => this.setState({expenseAmount: ''})}
               keyboardType='numeric'
             />
             <View style={styles.buttonContainer}>
@@ -110,7 +164,10 @@ export default function Home() {
           </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   )
+  }
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
 
 const styles = StyleSheet.create({
   container: {
